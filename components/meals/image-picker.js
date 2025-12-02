@@ -6,6 +6,7 @@ import Image from "next/image";
 function ImagePicker({ label, name, onChange, ...props }) {
   const inputRef = useRef();
   const [imageUrl, setImageUrl] = useState(null);
+  const [error, setError] = useState(null);
 
   const handleButtonClick = () => {
     inputRef.current?.click();
@@ -16,9 +17,31 @@ function ImagePicker({ label, name, onChange, ...props }) {
 
     if (!file) {
       setImageUrl(null);
+      setError(null);
       onChange?.(null); // Notify react-hook-form
       return;
     }
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      setError("Please select a valid image file");
+      setImageUrl(null);
+      onChange?.(null);
+      return;
+    }
+
+    // Validate file size (20MB limit to match Next.js config)
+    const maxSize = 20 * 1024 * 1024; // 20MB in bytes
+    if (file.size > maxSize) {
+      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      setError(`Image is too large (${fileSizeMB}MB). Maximum size is 20MB.`);
+      setImageUrl(null);
+      onChange?.(null);
+      return;
+    }
+
+    // Clear any previous errors
+    setError(null);
 
     const fileReader = new FileReader();
     fileReader.onload = () => {
@@ -35,7 +58,8 @@ function ImagePicker({ label, name, onChange, ...props }) {
       <label htmlFor={name}>{label}</label>
       <div className={classes.controls}>
         <div className={classes.preview}>
-          {!imageUrl && <p>No image selected.</p>}
+          {!imageUrl && !error && <p>No image selected.</p>}
+          {error && <p style={{ color: "#dc2626" }}>{error}</p>}
           {imageUrl && (
             <Image src={imageUrl} alt="The image selected by user" fill />
           )}
@@ -44,7 +68,7 @@ function ImagePicker({ label, name, onChange, ...props }) {
           className={classes.input}
           type="file"
           id={name}
-          accept="image/png, image/jpeg"
+          accept="image/*"
           name={name}
           ref={inputRef}
           onChange={handleImageChange}
