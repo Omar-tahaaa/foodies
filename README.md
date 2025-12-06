@@ -4,7 +4,7 @@ A modern, full-stack web application built with Next.js that allows food enthusi
 
 ## 🌐 Live Demo
 
-**[View Live Demo](https://your-foodies-app.vercel.app)** ← Replace with your Vercel deployment URL
+**[View Live Demo](https://foodies-kappa-puce.vercel.app)**
 
 ## ✨ Features
 
